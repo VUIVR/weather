@@ -1,23 +1,24 @@
 <template>
-  <div id="app">
-    <el-button>el-button</el-button>
-  </div>
+  <el-row class="main-page">
+    <weather-widjet />
+  </el-row>
 </template>
 
 <script>
+import weatherWidjet from './components/weather-widget'
 
 export default {
-  name: 'app'
+  name: 'app',
+  components: {
+    weatherWidjet
+  }
 }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+.main-page {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 </style>
