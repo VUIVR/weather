@@ -1,25 +1,26 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <div>
+      <p>
+        If Element is successfully added to this project, you'll see an
+        <code v-text="'<el-button>'"></code>
+        below
+      </p>
+      <el-button>el-button</el-button>
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+<script>
 
-export default Vue.extend({
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-});
+export default {
+  name: 'app'
+}
 </script>
 
-<style lang="scss">
+<style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
