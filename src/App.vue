@@ -19,6 +19,6 @@ export default {
 .main-page {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 10vh;
 }
 </style>
