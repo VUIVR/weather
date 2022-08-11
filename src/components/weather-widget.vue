@@ -1,7 +1,18 @@
 <template>
   <div v-loading="loading">
     <div v-for="city in weatherList" :key="city?.id" class="widjet">
-      {{ city?.id }}
+      <div>{{ city.name }}, {{ city.sys.country }} </div>
+      <div>
+        <img :src="`http://openweathermap.org/img/w/${city.weather[0].icon}.png`" alt="weather" />
+        <div>{{ Math.round(city.main.temp) }}℃</div>
+      </div>
+      <div>
+        Ущущается как {{ city.main.feels_like }}℃.  <br/>
+        {{ city.weather[0].description }}
+      </div>
+      <div></div>
+      <div></div>
+
     </div>
   </div>
 </template>
@@ -38,7 +49,7 @@
           .then((responce: AxiosResponse<CurrentResponse>):void => {
             //@ts-ignore
             this.weatherList.push(responce.data);
-            console.log(responce)
+            console.log(responce.data)
           })
           .catch((error: AxiosError):void => {
             console.log(error)
