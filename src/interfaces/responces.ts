@@ -1,49 +1,56 @@
-const data = {
-  coord: {
-    lon: -0.1257,
-    lat: 51.5085,
-  },
-  weather: [
-    {
-      id: 800,
-      main: 'Clear',
-      description: 'clear sky',
-      icon: '01d',
-    },
-  ],
-  base: 'stations',
-  main: {
-    temp: 23.6,
-    feels_like: 23.69,
-    temp_min: 18.92,
-    temp_max: 25.98,
-    pressure: 1028,
-    humidity: 64,
-  },
-  visibility: 10000,
-  wind: {
-    speed: 4.12,
-    deg: 100,
-  },
-  clouds: {
-    all: 0,
-  },
-  dt: 1626552114,
-  sys: {
-    type: 2,
-    id: 268730,
-    country: 'GB',
-    sunrise: 1626494599,
-    sunset: 1626552575,
-  },
-  timezone: 3600,
-  id: 2643743,
-  name: 'London',
-  cod: 200,
+export interface ICity extends Dictionary<ICoord | IWeather[] | IMain | IWind | IClouds | ISys | number | string | undefined> {
+  coord: ICoord,
+  weather: IWeather[],
+  base: string,
+  main: IMain,
+  visibility: number,
+  wind: IWind,
+  clouds: IClouds,
+  dt: number,
+  sys: ISys,
+  timezone: number,
+  id: number,
+  name: string,
+  cod: number,
 };
 
-type Visibility = {
-  visibility?: number;
-};
+export interface ISys {
+  type: number,
+  id: number,
+  country: string,
+  sunrise: number,
+  sunset: number
+}
 
-export type CurrentResponse = typeof data & Visibility;
+export interface IClouds {
+  all: number
+}
+
+export interface IWind {
+  speed: number,
+  deg: number
+}
+
+export interface ICoord {
+  lon: number,
+  lat: number
+}
+export interface IWeather {
+  id: number,
+  main: string,
+  description: string,
+  icon: string
+}
+
+export interface IMain {
+  temp: number,
+  feels_like: number,
+  temp_min: number,
+  temp_max: number,
+  pressure: number,
+  humidity: number
+}
+
+export interface Dictionary<T> {
+  [key: string]: T
+}

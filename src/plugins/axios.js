@@ -2,6 +2,7 @@
 
 import Vue from 'vue';
 import axios from "axios";
+import './axios'
 
 // Full config:  https://github.com/axios/axios#request-config
 // axios.defaults.baseURL = process.env.baseURL || process.env.apiUrl || '';

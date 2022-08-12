@@ -34,6 +34,7 @@
         </draggable>
 
         <el-select
+          v-model="searchText"
           size="mini"
           filterable
           remote
@@ -76,51 +77,51 @@
   import draggable from 'vuedraggable'
 
   import { AxiosResponse, AxiosError } from 'axios';
-  import { CurrentResponse } from '../interfaces/responces'
+  import { ICity, ICoord } from '../interfaces/responces'
 
   export default defineComponent ({
     name: 'weather-widjet',
     components: {
-      draggable,
+      draggable
     },
     mounted() {
-     if (localStorage.getItem('weatherWidjet')) {
-       //@ts-ignore
-       JSON.parse(localStorage.getItem('weatherWidjet')).forEach((el:any) => {
-         this.getWeather(el.coord)
-       })
-     }
-     else {
-       this.getWeather({ lat: '55.7504461', lon: '37.6174943' }) // Moscow
-     }
+      if (localStorage.getItem('weatherWidjet')) {
+        JSON.parse(localStorage.getItem('weatherWidjet')!).forEach((el:ICity) => {
+          this.getWeather(el.coord)
+        })
+      }
+      else {
+        this.remoteMethod('Москва')
+        this.getWeather(this.searchCityes[0]) // Moscow
+      }
     },
     data() {
       return {
         loading: false,
-        searchLoading: false,
+        searchLoading:false,
         weatherList: [],
         showPopover: false,
-        searchCityes: []
+        searchCityes: [],
+        searchText: null
       }
     },
     methods: {
-      async getWeather(item?:any) {
+      async getWeather(item?:ICoord):Promise<void> {
         this.loading = true
-
         const params = {
-          appid: 'e758a22a0c8788762afcbadda4a20310', //TODO спрятать
+          appid: 'e758a22a0c8788762afcbadda4a20310',
           units: 'metric',
           lang: 'ru',
-          lat: item.lat,
-          lon: item.lon
+          lat: item?.lat,
+          lon: item?.lon
         }
-        //@ts-ignore
         await this.$axios
           .get('https://api.openweathermap.org/data/2.5/weather', { params })
-          .then((responce: AxiosResponse<CurrentResponse>):void => {
-            //@ts-ignore
-            this.weatherList.push(responce.data)
-            localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
+          .then((responce: AxiosResponse<ICity>):void => {
+            const data: ICity[] = []
+            data.push(responce.data)
+            localStorage.setItem ("weatherWidjet", JSON.stringify(data))
+            this.weatherList = Object.assign(data)
           })
           .catch((error: AxiosError):void => {
             console.log(error)
@@ -128,18 +129,16 @@
           .finally(():void => { this.loading = false })
       },
 
-      async remoteMethod (query: string) {
+      async remoteMethod (query: string):Promise<void> {
         this.searchloading = true
         const params = {
           q: query,
-          appid: 'e758a22a0c8788762afcbadda4a20310', //TODO спрятать
+          appid: 'e758a22a0c8788762afcbadda4a20310',
           limit: 5
         }
-        //@ts-ignore
         await this.$axios
           .get('http://api.openweathermap.org/geo/1.0/direct', { params })
-          .then((responce: AxiosResponse<CurrentResponse>):void => {
-            //@ts-ignore
+          .then((responce: AxiosResponse<any>):void => {
             this.searchCityes = responce.data
           })
           .finally(()=> { this.searchloading = false })
@@ -152,18 +151,19 @@
         return `${hour > 10 ? hour : `0${hour}` }:${minutes > 10 ? minutes : `0${minutes}` }`
       },
 
-      changeCity (item: any) {
+      changeCity (item: ICity):void {
         this.resetInput()
-        //@ts-ignore
-        this.getWeather(item)
+        this.getWeather(item.coord)
       },
 
-      resetInput () {
+      resetInput ():void {
         this.searchCityes = []
+        this.searchText = null
       },
 
-      deleteCity (city:any) {
-        this.weatherList = this.weatherList.filter((i:any) => i.id !== city.id)
+      deleteCity (city:ICity):void {
+        this.searchText = null
+        this.weatherList = this.weatherList.filter((i:ICity) => i.id !== city.id)
         localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
       }
     }
