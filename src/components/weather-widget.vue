@@ -4,6 +4,9 @@
   <transition-group name="slide-bottom" >
     <div
       v-loading="loading"
+      element-loading-text="Загрузка, нужно подождать чуток..."
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
       v-for="city in weatherList"
       :key="city?.id"
       class="widjet"
@@ -21,12 +24,12 @@
         </div>
 
         <draggable v-model="weatherList">
-          <div v-for="city in changeCityList" :key="city.lat" class="widjet__city-list city-list">
+          <div v-for="city in weatherList" :key="city.lat" class="widjet__city-list city-list">
             <i class="el-icon-sort city-list__icon-drag" />
             <div class="city-list__city">
               {{ city.name }}
             </div>
-            <i v-if="changeCityList.length > 1" class="el-icon-delete city-list__icon-delete" @click="deleteCity(city)" />
+            <i v-if="weatherList.length > 1" class="el-icon-delete city-list__icon-delete" @click="deleteCity(city)" />
           </div>
         </draggable>
 
@@ -56,13 +59,13 @@
         <div>{{ Math.round(city.main.temp) }}℃</div>
       </div>
       <div class="widjet__descr">
-        Ущущается как {{ city.main.feels_like }}℃.  <br/>
+        Ущущается как {{ Math.round(city.main.feels_like) }}℃  <br/>
         {{ city.weather[0].description.split('').splice(0,1).join('').toUpperCase() +
-        city.weather[0].description.split('').slice(1).join('') }}.
+        city.weather[0].description.split('').slice(1).join('') }}
       </div>
       <div class="widjet__sunrise">Рассвет: {{ getTime(city.sys.sunrise) }}</div>
       <div class="widjet__sunset">Закат: {{ getTime(city.sys.sunset) }}</div>
-      <div class="widjet__wind">Ветер: {{ Math.round(city.wind.speed) }}м/с</div>
+      <div class="widjet__wind">Ветер: {{ Math.round(city.wind.speed)  }}м/с</div>
     </div>
     </transition-group>
   </div>
@@ -81,7 +84,15 @@
       draggable,
     },
     mounted() {
-      this.getWeather({ lat: '55.7504461', lon: '37.6174943' })
+     if (localStorage.getItem('weatherWidjet')) {
+       //@ts-ignore
+       JSON.parse(localStorage.getItem('weatherWidjet')).forEach((el:any) => {
+         this.getWeather(el.coord)
+       })
+     }
+     else {
+       this.getWeather({ lat: '55.7504461', lon: '37.6174943' }) // Moscow
+     }
     },
     data() {
       return {
@@ -89,13 +100,13 @@
         searchLoading: false,
         weatherList: [],
         showPopover: false,
-        changeCityList: [],
         searchCityes: []
       }
     },
     methods: {
       async getWeather(item?:any) {
         this.loading = true
+
         const params = {
           appid: 'e758a22a0c8788762afcbadda4a20310', //TODO спрятать
           units: 'metric',
@@ -109,8 +120,7 @@
           .then((responce: AxiosResponse<CurrentResponse>):void => {
             //@ts-ignore
             this.weatherList.push(responce.data)
-            //@ts-ignore
-            this.changeCityList.push(responce.data)
+            localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
           })
           .catch((error: AxiosError):void => {
             console.log(error)
@@ -153,9 +163,8 @@
       },
 
       deleteCity (city:any) {
-        console.log(city)
-        this.changeCityList.filter((i:any) => { i.id !== city.id })
-        console.log(this.changeCityList.filter((i:any) => { i.id !== city.id }));
+        this.weatherList = this.weatherList.filter((i:any) => i.id !== city.id)
+        localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
       }
     }
   })
@@ -197,7 +206,7 @@
     &__temp {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: start;
       font-size: 40px;
     }
 
