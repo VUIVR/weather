@@ -54,7 +54,7 @@
           </el-option>
         </el-select>
       </el-popover>
-      <div class="widjet__city">{{ city.name }}, {{ city.sys.country }} </div>
+      <div class="widjet__city">{{ city.name }}, {{ city.sys.country || '' }} </div>
       <div class="widjet__temp">
         <img :src="`http://openweathermap.org/img/w/${city.weather[0].icon}.png`" alt="weather" class="widjet__temp-img" />
         <div>{{ Math.round(city.main.temp) }}℃</div>
@@ -66,39 +66,41 @@
       </div>
       <div class="widjet__sunrise">Рассвет: {{ getTime(city.sys.sunrise) }}</div>
       <div class="widjet__sunset">Закат: {{ getTime(city.sys.sunset) }}</div>
-      <div class="widjet__wind">Ветер: {{ Math.round(city.wind.speed)  }}м/с</div>
+      <div class="widjet__wind">Ветер: {{ Math.round(city.wind.speed) }}м/с</div>
     </div>
     </transition-group>
   </div>
 </template>
 
-<script lang="ts">
-  import { defineComponent } from 'vue'
+<script lang="ts" type="module">
   import draggable from 'vuedraggable'
 
   import { AxiosResponse, AxiosError } from 'axios';
-  import { ICity, ICoord } from '../interfaces/responces'
+  import { ICity, ICoord } from '../interfaces/city'
+  import { IData } from '../interfaces/data'
 
-  export default defineComponent ({
+  export default {
     name: 'weather-widjet',
     components: {
       draggable
     },
     mounted() {
-      if (localStorage.getItem('weatherWidjet')) {
+      const dataLocalStorage: string | null = localStorage.getItem('weatherWidjet')
+
+      if (dataLocalStorage && JSON.parse(dataLocalStorage).length) {
         JSON.parse(localStorage.getItem('weatherWidjet')!).forEach((el:ICity) => {
           this.getWeather(el.coord)
         })
       }
       else {
         this.remoteMethod('Москва')
-        this.getWeather(this.searchCityes[0]) // Moscow
+        .then(()=> { this.getWeather(this.searchCityes[0]) })
       }
     },
-    data() {
+    data():IData {
       return {
         loading: false,
-        searchLoading:false,
+        searchLoading: false,
         weatherList: [],
         showPopover: false,
         searchCityes: [],
@@ -106,7 +108,7 @@
       }
     },
     methods: {
-      async getWeather(item?:ICoord):Promise<void> {
+      async getWeather(item:ICoord):Promise<void> {
         this.loading = true
         const params = {
           appid: 'e758a22a0c8788762afcbadda4a20310',
@@ -118,10 +120,8 @@
         await this.$axios
           .get('https://api.openweathermap.org/data/2.5/weather', { params })
           .then((responce: AxiosResponse<ICity>):void => {
-            const data: ICity[] = []
-            data.push(responce.data)
-            localStorage.setItem ("weatherWidjet", JSON.stringify(data))
-            this.weatherList = Object.assign(data)
+            this.weatherList.push(responce.data)
+            localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
           })
           .catch((error: AxiosError):void => {
             console.log(error)
@@ -130,7 +130,7 @@
       },
 
       async remoteMethod (query: string):Promise<void> {
-        this.searchloading = true
+        this.searchLoading = true
         const params = {
           q: query,
           appid: 'e758a22a0c8788762afcbadda4a20310',
@@ -138,10 +138,10 @@
         }
         await this.$axios
           .get('http://api.openweathermap.org/geo/1.0/direct', { params })
-          .then((responce: AxiosResponse<any>):void => {
+          .then((responce: AxiosResponse<ICoord[]>):void => {
             this.searchCityes = responce.data
           })
-          .finally(()=> { this.searchloading = false })
+          .finally(()=> { this.searchLoading = false })
       },
 
       getTime ( time:number ):string {
@@ -151,9 +151,9 @@
         return `${hour > 10 ? hour : `0${hour}` }:${minutes > 10 ? minutes : `0${minutes}` }`
       },
 
-      changeCity (item: ICity):void {
+      changeCity (item: ICoord):void {
         this.resetInput()
-        this.getWeather(item.coord)
+        this.getWeather(item)
       },
 
       resetInput ():void {
@@ -163,11 +163,11 @@
 
       deleteCity (city:ICity):void {
         this.searchText = null
-        this.weatherList = this.weatherList.filter((i:ICity) => i.id !== city.id)
+        this.weatherList = this.weatherList.filter((i:ICity):boolean => i.id !== city.id)
         localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
       }
     }
-  })
+  }
 </script>
 
 <style lang="scss">

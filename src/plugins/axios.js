@@ -2,7 +2,7 @@
 
 import Vue from 'vue';
 import axios from "axios";
-import './axios'
+/* import './axios' */
 
 // Full config:  https://github.com/axios/axios#request-config
 // axios.defaults.baseURL = process.env.baseURL || process.env.apiUrl || '';
@@ -23,16 +23,16 @@ Plugin.install = function(Vue, options) {
   Object.defineProperties(Vue.prototype, {
     axios: {
       get() {
-        return _axios;
+        return _axios
       }
     },
     $axios: {
       get() {
-        return _axios;
+        return _axios
       }
-    },
-  });
-};
+    }
+  })
+}
 
 Vue.use(Plugin)
 

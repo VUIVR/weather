@@ -33,7 +33,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-, "src/plugins/draggable.js"  ],
+, "src/plugins/draggable.js", "src/main.ts"  ],
   "exclude": [
     "node_modules"
   ]

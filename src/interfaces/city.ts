@@ -1,4 +1,4 @@
-export interface ICity extends Dictionary<ICoord | IWeather[] | IMain | IWind | IClouds | ISys | number | string | undefined> {
+export interface ICity {
   coord: ICoord,
   weather: IWeather[],
   base: string,
@@ -11,8 +11,8 @@ export interface ICity extends Dictionary<ICoord | IWeather[] | IMain | IWind | 
   timezone: number,
   id: number,
   name: string,
-  cod: number,
-};
+  cod: number
+}
 
 export interface ISys {
   type: number,
@@ -49,8 +49,4 @@ export interface IMain {
   temp_max: number,
   pressure: number,
   humidity: number
-}
-
-export interface Dictionary<T> {
-  [key: string]: T
 }
