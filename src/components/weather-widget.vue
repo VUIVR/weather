@@ -61,8 +61,7 @@
       </div>
       <div class="widjet__descr">
         Ощущается как {{ Math.round(city.main.feels_like) }}℃  <br/>
-        {{ city.weather[0].description[0].toUpperCase() +
-        city.weather[0].description.split('').slice(1).join('') }}
+        {{ city.weather[0].description[0].toUpperCase() + city.weather[0].description.slice(1) }}
       </div>
       <div class="widjet__sunrise">Рассвет: {{ getTime(city.sys.sunrise) }}</div>
       <div class="widjet__sunset">Закат: {{ getTime(city.sys.sunset) }}</div>
