@@ -1,5 +1,7 @@
 <template>
+  <div class="main-page">
     <weather-widjet />
+  </div>
 </template>
 
 <script>

@@ -12,6 +12,6 @@ import './assets/main.scss'
 const Widjet: any = wrap(Vue, () => import('./components/weather-widget.vue'))
 window.customElements.define('weather-widjets', Widjet)
 
-/* new Vue({
+new Vue({
   render: h => h(App)
-}).$mount('#app') */
+}).$mount('#app')
