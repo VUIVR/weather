@@ -11,7 +11,8 @@ export interface ICity {
   timezone: number,
   id: number,
   name: string,
-  cod: number
+  cod: number,
+  lat: number
 }
 
 export interface ISys {
@@ -32,8 +33,12 @@ export interface IWind {
 }
 
 export interface ICoord {
+  country: string,
   lon: number,
-  lat: number
+  local_names: any
+  lat: number,
+  name: string,
+  state: string
 }
 export interface IWeather {
   id: number,

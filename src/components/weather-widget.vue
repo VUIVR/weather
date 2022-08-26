@@ -1,72 +1,71 @@
 <template>
-  <div class="widjet__wrapper"
-  >
-  <transition-group name="slide-bottom" >
-    <div
-      v-loading="loading"
-      element-loading-text="Загрузка, нужно подождать чуток..."
-      element-loading-spinner="el-icon-loading"
-      element-loading-background="rgba(0, 0, 0, 0.8)"
-      v-for="city in weatherList"
-      :key="city?.id"
-      class="widjet"
-    >
-      <el-popover
-        v-if="!loading"
-        title="Настройки виджета"
-        width="180"
-        @click="showPopover = true"
-        placement="bottom-end"
-        @hide="resetInput"
+  <div class="widjet__wrapper">
+    <transition-group name="slide-bottom" >
+      <div
+        v-loading="loading"
+        element-loading-text="Загрузка, нужно подождать чуток..."
+        element-loading-spinner="el-icon-loading"
+        element-loading-background="rgba(0, 0, 0, 0.8)"
+        v-for="city in weatherList"
+        :key="city?.id"
+        class="widjet"
       >
-        <div slot="reference" class="widjet__settings">
-          <i class="el-icon-s-tools"></i>
-        </div>
-
-        <draggable v-model="weatherList">
-          <div v-for="city in weatherList" :key="city.lat" class="widjet__city-list city-list">
-            <i class="el-icon-sort city-list__icon-drag" />
-            <div class="city-list__city">
-              {{ city.name }}
-            </div>
-            <i v-if="weatherList.length > 1" class="el-icon-delete city-list__icon-delete" @click="deleteCity(city)" />
-          </div>
-        </draggable>
-
-        <el-select
-          v-model="searchText"
-          size="mini"
-          filterable
-          remote
-          clearable
-          reserve-keyword
-          placeholder="Поиск города"
-          :remote-method="remoteMethod"
-          no-data-text="Нет совпадений"
-          @change="changeCity"
+        <el-popover
+          v-if="!loading"
+          title="Настройки виджета"
+          width="180"
+          @click="showPopover = true"
+          placement="bottom-end"
+          @hide="resetInput"
         >
-          <el-option
-            v-for="item in searchCityes"
-            :key="item.lat"
-            :label="`${item.local_names?.ru || item.name}, ${item.country}`"
-            :value="item"
+          <div slot="reference" class="widjet__settings">
+            <i class="el-icon-s-tools"></i>
+          </div>
+
+          <draggable v-model="weatherList">
+            <div v-for="city in weatherList" :key="city.lat" class="widjet__city-list city-list">
+              <i class="el-icon-sort city-list__icon-drag" > </i>
+              <div class="city-list__city">
+                {{ city.name }}
+              </div>
+              <i v-if="weatherList.length > 1" class="el-icon-delete city-list__icon-delete" @click="deleteCity(city)"> </i>
+            </div>
+          </draggable>
+
+          <el-select
+            v-model="searchText"
+            size="mini"
+            filterable
+            remote
+            clearable
+            reserve-keyword
+            placeholder="Поиск города"
+            :remote-method="remoteMethod"
+            no-data-text="Нет совпадений"
+            @change="changeCity"
           >
-          </el-option>
-        </el-select>
-      </el-popover>
-      <div class="widjet__city">{{ city.name }}, {{ city.sys.country || '' }} </div>
-      <div class="widjet__temp">
-        <img :src="`http://openweathermap.org/img/w/${city.weather[0].icon}.png`" alt="weather" class="widjet__temp-img" />
-        <div>{{ Math.round(city.main.temp) }}℃</div>
+            <el-option
+              v-for="item in searchCityes"
+              :key="item.lat"
+              :label="`${item.local_names?.ru || item.name}, ${item.country}`"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
+        </el-popover>
+        <div class="widjet__city">{{ city.name }}, {{ city.sys.country || '' }} </div>
+        <div class="widjet__temp">
+          <img :src="`${url_img}${city.weather[0].icon}.png`" alt="weather" class="widjet__temp-img" />
+          <div>{{ Math.round(city.main.temp) }}℃</div>
+        </div>
+        <div class="widjet__descr">
+          Ощущается как {{ Math.round(city.main.feels_like) }}℃  <br/>
+          {{ city.weather[0].description[0].toUpperCase() + city.weather[0].description.slice(1) }}
+        </div>
+        <div class="widjet__sunrise">Рассвет: {{ getTime(city.sys.sunrise) }}</div>
+        <div class="widjet__sunset">Закат: {{ getTime(city.sys.sunset) }}</div>
+        <div class="widjet__wind">Ветер: {{ Math.round(city.wind.speed) }}м/с</div>
       </div>
-      <div class="widjet__descr">
-        Ощущается как {{ Math.round(city.main.feels_like) }}℃  <br/>
-        {{ city.weather[0].description[0].toUpperCase() + city.weather[0].description.slice(1) }}
-      </div>
-      <div class="widjet__sunrise">Рассвет: {{ getTime(city.sys.sunrise) }}</div>
-      <div class="widjet__sunset">Закат: {{ getTime(city.sys.sunset) }}</div>
-      <div class="widjet__wind">Ветер: {{ Math.round(city.wind.speed) }}м/с</div>
-    </div>
     </transition-group>
   </div>
 </template>
@@ -74,16 +73,28 @@
 <script lang="ts" type="module">
   import draggable from 'vuedraggable'
 
-  import { AxiosResponse, AxiosError } from 'axios';
-  import { ICity, ICoord } from '../interfaces/city'
-  import { IData } from '../interfaces/data'
+  import { AxiosResponse, AxiosError } from 'axios'
+  import { ICity, ICoord } from '@/interfaces/city'
+  import { IData } from '@/interfaces/data'
+  import { defineComponent } from 'vue'
 
-  export default {
+  export default defineComponent({
     name: 'weather-widjet',
     components: {
       draggable
     },
-    mounted() {
+    data():IData {
+      return {
+        loading: false,
+        searchLoading: false,
+        weatherList: [],
+        showPopover: false,
+        searchCityes: [],
+        searchText: null,
+        url_img: process.env.VUE_APP_URL_IMG
+      }
+    },
+    mounted()  {
       const dataLocalStorage: string | null = localStorage.getItem('weatherWidjet')
 
       if (dataLocalStorage && JSON.parse(dataLocalStorage).length) {
@@ -96,28 +107,18 @@
         .then(()=> { this.getWeather(this.searchCityes[0]) })
       }
     },
-    data():IData {
-      return {
-        loading: false,
-        searchLoading: false,
-        weatherList: [],
-        showPopover: false,
-        searchCityes: [],
-        searchText: null
-      }
-    },
     methods: {
       async getWeather(item:ICoord):Promise<void> {
         this.loading = true
         const params = {
-          appid: 'e758a22a0c8788762afcbadda4a20310',
+          appid: process.env.VUE_APP_APPID,
           units: 'metric',
           lang: 'ru',
           lat: item?.lat,
           lon: item?.lon
         }
         await this.$axios
-          .get('https://api.openweathermap.org/data/2.5/weather', { params })
+          .get(`${process.env.VUE_APP_URL_WEATHER}`, { params })
           .then((responce: AxiosResponse<ICity>):void => {
             this.weatherList.push(responce.data)
             localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
@@ -136,8 +137,9 @@
           limit: 5
         }
         await this.$axios
-          .get('http://api.openweathermap.org/geo/1.0/direct', { params })
+          .get(`${process.env.VUE_APP_URL_CITY}`, { params })
           .then((responce: AxiosResponse<ICoord[]>):void => {
+            console.log(responce.data)
             this.searchCityes = responce.data
           })
           .finally(()=> { this.searchLoading = false })
@@ -166,7 +168,7 @@
         localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
       }
     }
-  }
+  })
 </script>
 
 <style lang="scss">

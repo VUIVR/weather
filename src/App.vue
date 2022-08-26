@@ -4,8 +4,8 @@
   </div>
 </template>
 
-<script>
-import weatherWidjet from './components/weather-widget'
+<script lang="ts">
+import weatherWidjet from '@/components/weather-widget.vue'
 
 export default {
   components: {

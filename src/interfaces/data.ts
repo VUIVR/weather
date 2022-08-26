@@ -6,5 +6,6 @@ export interface IData {
   weatherList: ICity[],
   showPopover: boolean,
   searchCityes: ICoord[],
-  searchText: string | null
+  searchText: string | null,
+  url_img: string
 }
