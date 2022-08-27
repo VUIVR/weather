@@ -40,7 +40,7 @@
             clearable
             reserve-keyword
             placeholder="Поиск города"
-            :remote-method="remoteMethod"
+            :remote-method="searchCity"
             no-data-text="Нет совпадений"
             @change="changeCity"
           >
@@ -73,10 +73,10 @@
 <script lang="ts" type="module">
   import draggable from 'vuedraggable'
 
-  import { AxiosResponse, AxiosError } from 'axios'
   import { ICity, ICoord } from '@/interfaces/city'
   import { IData } from '@/interfaces/data'
   import { defineComponent } from 'vue'
+  import { mapGetters, mapMutations } from 'vuex'
 
   export default defineComponent({
     name: 'weather-widjet',
@@ -87,28 +87,32 @@
       return {
         loading: false,
         searchLoading: false,
-        weatherList: [],
         showPopover: false,
-        searchCityes: [],
         searchText: null,
         url_img: process.env.VUE_APP_URL_IMG
       }
     },
+    computed: {
+      ...mapGetters ([
+        'weatherList',
+        'searchCityes'
+      ]),
+
+
+    },
     mounted()  {
       const dataLocalStorage: string | null = localStorage.getItem('weatherWidjet')
-
       if (dataLocalStorage && JSON.parse(dataLocalStorage).length) {
-        JSON.parse(localStorage.getItem('weatherWidjet')!).forEach((el:ICity) => {
-          this.getWeather(el.coord)
-        })
+        JSON.parse(localStorage.getItem('weatherWidjet')!)
+        .forEach((el:ICity) => this.getWeather(el.coord))
       }
       else {
-        this.remoteMethod('Москва')
-        .then(()=> { this.getWeather(this.searchCityes[0]) })
+        this.searchCity('Москва')
+        .then(()=> this.getWeather(this.searchCityes[0]))
       }
     },
     methods: {
-      async getWeather(item:ICoord):Promise<void> {
+      getWeather(item:ICoord):void {
         this.loading = true
         const params = {
           appid: process.env.VUE_APP_APPID,
@@ -117,32 +121,19 @@
           lat: item?.lat,
           lon: item?.lon
         }
-        await this.$axios
-          .get(`${process.env.VUE_APP_URL_WEATHER}`, { params })
-          .then((responce: AxiosResponse<ICity>):void => {
-            this.weatherList.push(responce.data)
-            localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
-          })
-          .catch((error: AxiosError):void => {
-            console.log(error)
-          })
-          .finally(():void => { this.loading = false })
+        this.$store.dispatch('getWeatherList', params)
+        .finally(():void => { this.loading = false })
       },
 
-      async remoteMethod (query: string):Promise<void> {
+      async searchCity (query: string):Promise<void> {
         this.searchLoading = true
         const params = {
           q: query,
-          appid: 'e758a22a0c8788762afcbadda4a20310',
+          appid: process.env.VUE_APP_APPID,
           limit: 5
         }
-        await this.$axios
-          .get(`${process.env.VUE_APP_URL_CITY}`, { params })
-          .then((responce: AxiosResponse<ICoord[]>):void => {
-            console.log(responce.data)
-            this.searchCityes = responce.data
-          })
-          .finally(()=> { this.searchLoading = false })
+        await this.$store.dispatch('searchCity', params)
+        .finally(()=> { this.searchLoading = false })
       },
 
       getTime ( time:number ):string {
@@ -164,8 +155,7 @@
 
       deleteCity (city:ICity):void {
         this.searchText = null
-        this.weatherList = this.weatherList.filter((i:ICity):boolean => i.id !== city.id)
-        localStorage.setItem ("weatherWidjet", JSON.stringify(this.weatherList))
+        this.$store.dispatch('deleteCity', city)
       }
     }
   })
