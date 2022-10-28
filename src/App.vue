@@ -10,7 +10,9 @@ import weatherWidjet from '@/components/weather-widget.vue'
 export default {
   components: {
     weatherWidjet
-  }
+  },
+  methods: {
+  },
 }
 </script>
 
